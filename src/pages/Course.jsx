@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import "../../src/App.css";
 import { Link } from "react-router-dom";
-import supabase from "../supabase"; // ajuste se o caminho for diferente
+import { supabase } from "../utils/supabase.js"; // ✅ CORRETO
 
 /* ---------------------------------------------------------
  * Navegação lateral (estático)
