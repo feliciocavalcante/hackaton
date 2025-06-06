@@ -29,7 +29,7 @@ export default function LoginForm() {
     }
 
     console.log("Usuário logado:", data.user);
-    navigate("/");
+    navigate("/admin"); // Redireciona para a dashboard admin
   };
 
   return (
