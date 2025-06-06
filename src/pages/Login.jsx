@@ -1,22 +1,36 @@
-
-import { useState } from "react"
-import "../App.css"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabase.js";
+import "../App.css";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMsg(null);
 
-    // Simular chamada de API
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    console.log("Login:", { email, password })
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+
+    if (error) {
+      setErrorMsg(error.message);
+      return;
+    }
+
+    console.log("Usuário logado:", data.user);
+    navigate("/");
+  };
 
   return (
     <div className="login-container">
@@ -51,11 +65,13 @@ export default function LoginForm() {
             />
           </div>
 
+          {errorMsg && <p className="error-message">{errorMsg}</p>}
+
           <button type="submit" className="login-button" disabled={isLoading}>
             {isLoading ? "Entrando..." : "Entrar"}
           </button>
         </form>
       </div>
     </div>
-  )
+  );
 }
