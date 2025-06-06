@@ -1,5 +1,5 @@
 
-import React from 'react';
+
 import { useState } from "react"
 import {
   BookOpen,
@@ -97,6 +97,7 @@ export default function App() {
             <div>
               <h1 className="text-lg font-bold">CourseOS</h1>
               <p className="text-xs text-gray-400">by Jorge Gonzalez</p>
+              
             </div>
           </div>
         </div>
@@ -193,12 +194,14 @@ export default function App() {
               The Course Operating System is a Template that lets you host your online course directly in Framer and
               connect it with Gumroad.
             </p>
+            <Link to="/login"><button className="login-button mt-8">Entrar</button></Link>
           </div>
-          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-black/20 "></div>  
         </div>
 
         {/* Course Content */}
         <div className="p-8 ">
+          
           {/* Modular Section Header */}
           <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-700 ">
             <h2 className="text-2xl font-bold ">Modular</h2>
