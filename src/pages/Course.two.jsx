@@ -1,186 +1,70 @@
-/* src/pages/LessonPlayer.jsx — página que exibe o player de vídeo e materiais da aula  */
+/* src/pages/CourseTwo.jsx — página da aula individual */
 
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { supabase } from "../utils/supabase.js";
-
+import { useParams } from "react-router-dom";
+import { supabase } from "../utils/supabase";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import "../../src/App.css";
 
-/* Navegação lateral (fixa – pode vir do banco futuramente) */
-const navigationItems = [
-  { id: "introduction", label: "Introduction", icon: "📚" },
-  { id: "foundation", label: "Foundation", icon: "🏗️" },
-  { id: "content", label: "Content", icon: "📝" },
-  { id: "strategies", label: "Strategies", icon: "🎯" },
-  { id: "community", label: "Community", icon: "👥" },
-  { id: "branding", label: "Branding", icon: "🎨" },
-  { id: "metrics", label: "Metrics", icon: "📊" },
-  { id: "search", label: "Search", icon: "🔍" },
-];
+function formatDuration(s) {
+  const m = Math.floor(s / 60);
+  const r = String(s % 60).padStart(2, "0");
+  return `${m}:${r}`;
+}
 
-/* Dados dummy para accordions (pode ser tabelas no supabase) */
-const accordionData = {
-  resources: [
-    { title: "Live Demo", content: "Access the live demo of this lesson project.", icon: "📄" },
-    { title: "Documentation", content: "Additional resources and documentation.", icon: "🔗" },
-  ],
-  downloads: [
-    { title: "Source Files", content: "Download the complete source code.", icon: "📁" },
-    { title: "Assets Package", content: "Download all assets and resources.", icon: "📁" },
-  ],
-  faq: [
-    {
-      title: "How do I customize the template?",
-      content: "You can customize by modifying CSS variables and properties.",
-    },
-    { title: "Is this template responsive?", content: "Yes, fully responsive for all devices." },
-  ],
-};
-
-export default function LessonPlayer() {
-  const { id } = useParams();               // id da aula vindo da rota
+export default function CourseTwo() {
+  const { id } = useParams();
   const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [expandedAccordions, setExpandedAccordions] = useState(new Set());
-  const [isCompleting, setIsCompleting] = useState(false);
-  const [isCompleted, setIsCompleted]   = useState(false);
 
-  /* Busca a aula no Supabase */
   useEffect(() => {
     async function fetchLesson() {
       const { data, error } = await supabase
         .from("aulas_ia_guanabara")
-        .select("id, titulo, duracao_segundos, video_link, descricao")
+        .select("id, titulo, descricao, duracao_segundos, video_url")
         .eq("id", id)
         .single();
 
       if (error) {
         console.error("Erro ao buscar aula:", error.message);
       } else {
-        setLesson(data);
+        setLesson({
+          ...data,
+          duration: formatDuration(data.duracao_segundos),
+        });
       }
       setLoading(false);
     }
     fetchLesson();
   }, [id]);
 
-  /* Toggle accordion */
-  const toggleAccordion = (key) => {
-    setExpandedAccordions((prev) => {
-      const set = new Set(prev);
-      set.has(key) ? set.delete(key) : set.add(key);
-      return set;
-    });
-  };
-
-  /* Concluir aula */
-  const handleComplete = async () => {
-    setIsCompleting(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setIsCompleting(false);
-    setIsCompleted(true);
-    alert("🎉 Congratulations! Lesson completed successfully!");
-    setTimeout(() => setIsCompleted(false), 3000);
-  };
-
   if (loading) return <div className="flex h-screen items-center justify-center text-white">Carregando aula…</div>;
-  if (!lesson)  return <div className="flex h-screen items-center justify-center text-red-400">Aula não encontrada.</div>;
+  if (!lesson) return <div className="text-white p-6">Aula não encontrada.</div>;
 
   return (
-    <div className="app">
-      {/* ------------ Sidebar -------------- */}
-      <aside className="sidebar">
-        <div className="logo">
-          <span className="logo-icon">⚙️</span> Course Template
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      <div className="mb-6">
+        <Link to="/" className="flex items-center text-orange-400 hover:underline">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Voltar para lista de aulas
+        </Link>
+      </div>
+
+      <div className="bg-gray-800 p-6 rounded-lg shadow-md">
+        <h1 className="text-3xl font-bold mb-2">{lesson.titulo}</h1>
+        <p className="text-sm text-gray-400 mb-4">Duração: {lesson.duration}</p>
+        <div className="aspect-w-16 aspect-h-9 mb-4">
+          <iframe
+            className="w-full h-full rounded-md"
+            src={lesson.video_url}
+            title={lesson.titulo}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
         </div>
-        <nav className="navigation">
-          {navigationItems.map((item) => (
-            <Link
-              key={item.id}
-              to={`#${item.id}`}
-              className={`nav-item ${item.id === "introduction" ? "active" : ""}`}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-
-      {/* ------------ Main Content ---------- */}
-      <main className="main-content">
-        {/* Header */}
-        <header className="lesson-header">
-          <h1 className="lesson-title">{lesson.titulo}</h1>
-          <p className="lesson-description">{lesson.descricao || "Sem descrição."}</p>
-        </header>
-
-        {/* Player YouTube */}
-        <section className="video-wrapper">
-          <div className="video-responsive">
-            <iframe
-              src={lesson.video_link.replace("watch?v=", "embed/")}
-              title={lesson.titulo}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-          </div>
-        </section>
-
-        {/* Summary */}
-        <section className="content-section">
-          <h2 className="section-title">Summary</h2>
-          <p className="section-content">
-            {lesson.descricao || "No summary available for this lesson."}
-          </p>
-        </section>
-
-        {/* Resources / Downloads / FAQ */}
-        {Object.entries(accordionData).map(([groupKey, items]) => (
-          <section className="content-section" key={groupKey}>
-            <h2 className="section-title">{groupKey.charAt(0).toUpperCase() + groupKey.slice(1)}</h2>
-            <div className="accordion-container">
-              {items.map((itm, idx) => {
-                const accId = `${groupKey}-${idx}`;
-                const isOpen = expandedAccordions.has(accId);
-                return (
-                  <div key={accId} className="accordion-item">
-                    <div className="accordion-header" onClick={() => toggleAccordion(accId)}>
-                      <div className="accordion-title-wrapper">
-                        {itm.icon && <span className="accordion-icon">{itm.icon}</span>}
-                        <span className="accordion-title">{itm.title}</span>
-                      </div>
-                      <span className="accordion-toggle">{isOpen ? "−" : "+"}</span>
-                    </div>
-                    {isOpen && (
-                      <div className="accordion-content">
-                        <p>{itm.content}</p>
-                        {groupKey === "downloads" && <button className="download-btn">Download</button>}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        ))}
-
-        {/* Botão de completar aula */}
-        <button
-          className={`complete-button ${isCompleted ? "completed" : ""}`}
-          onClick={handleComplete}
-          disabled={isCompleting}
-        >
-          {isCompleting ? "Completing…" : isCompleted ? "✓ Lesson Completed!" : "Complete Lesson"}
-        </button>
-
-        {/* Footer */}
-        <footer className="footer">
-          <span>Privacy Policy</span>
-          <span>Terms of Service</span>
-          <span>Buy this template</span>
-        </footer>
-      </main>
+        <p className="text-gray-300">{lesson.descricao}</p>
+      </div>
     </div>
   );
 }

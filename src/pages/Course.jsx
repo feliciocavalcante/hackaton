@@ -20,11 +20,8 @@ import {
 } from "lucide-react";
 import "../../src/App.css";
 import { Link } from "react-router-dom";
-import { supabase } from "../utils/supabase.js"; // ✅ CORRETO
+import { supabase } from "../utils/supabase.js";
 
-/* ---------------------------------------------------------
- * Navegação lateral (estático)
- * -------------------------------------------------------*/
 const sidebarItems = [
   { icon: BookOpen, label: "Introduction", active: true },
   { icon: BookOpen, label: "Curriculum" },
@@ -42,19 +39,14 @@ const accountItems = [
   { icon: LogOut, label: "Logout" },
 ];
 
-/* ---------------------------------------------------------
- * Ícones para distribuir nas aulas (caso não haja campo no banco)
- * -------------------------------------------------------*/
 const iconSet = [Play, Star, Zap, Lightbulb, Trophy, Rocket, Brain];
 
-/* utilitário: segundos → mm:ss */
 function formatDuration(s) {
   const m = Math.floor(s / 60);
   const r = String(s % 60).padStart(2, "0");
   return `${m}:${r}`;
 }
 
-/* Botão reutilizável */
 function Button({ children, variant = "default", size = "default", className = "", onClick }) {
   const base =
     "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background";
@@ -73,7 +65,6 @@ function Button({ children, variant = "default", size = "default", className = "
   );
 }
 
-/* Input reutilizável */
 function Input({ type = "text", placeholder, value, onChange, className = "" }) {
   return (
     <input
@@ -91,9 +82,6 @@ export default function Course() {
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  /* ------------------------------------------------------------------
-   * Busca as aulas do Supabase na montagem do componente
-   * ----------------------------------------------------------------*/
   useEffect(() => {
     async function fetchLessons() {
       const { data, error } = await supabase
@@ -117,15 +105,12 @@ export default function Course() {
     fetchLessons();
   }, []);
 
-  /* --------------------------------------------------------- */
   if (loading)
     return <div className="flex h-screen items-center justify-center text-white">Carregando aulas…</div>;
 
   return (
     <div className="flex h-screen bg-gray-900 text-white">
-      {/* -------- Sidebar -------- */}
       <aside className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
-        {/* Logo */}
         <div className="p-6 border-b border-gray-700">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
@@ -138,9 +123,7 @@ export default function Course() {
           </div>
         </div>
 
-        {/* Navegação */}
         <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
-          {/* Menu */}
           <section>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Menu</h3>
             <ul className="space-y-1">
@@ -155,7 +138,6 @@ export default function Course() {
             </ul>
           </section>
 
-          {/* Community */}
           <section>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Community</h3>
             <ul className="space-y-1">
@@ -170,7 +152,6 @@ export default function Course() {
             </ul>
           </section>
 
-          {/* Account */}
           <section>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Account</h3>
             <ul className="space-y-1">
@@ -186,7 +167,6 @@ export default function Course() {
           </section>
         </nav>
 
-        {/* Search */}
         <div className="p-4 border-t border-gray-700">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -200,15 +180,11 @@ export default function Course() {
         </div>
       </aside>
 
-      {/* -------- Main Content -------- */}
       <main className="flex-1 overflow-y-auto">
-        {/* Hero */}
         <header className="relative h-64 bg-gradient-to-r from-orange-600 via-red-500 to-yellow-500 flex items-center justify-center">
           <div className="text-center z-10">
             <h1 className="text-5xl font-bold mb-4">CourseOS</h1>
-            <p className="text-lg max-w-2xl mx-auto px-4">
-              Plataforma de curso aberto desenvolvida no Hackathon.
-            </p>
+            <p className="text-lg max-w-2xl mx-auto px-4">Plataforma de curso aberto desenvolvida no Hackathon.</p>
             <Link to="/login">
               <button className="login-button mt-8">Entrar</button>
             </Link>
@@ -216,7 +192,6 @@ export default function Course() {
           <span className="absolute inset-0 bg-black/20"></span>
         </header>
 
-        {/* Lessons */}
         <section className="p-8">
           <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-700">
             <h2 className="text-2xl font-bold">Conteúdo</h2>
@@ -229,10 +204,7 @@ export default function Course() {
               .map((lesson, idx) => {
                 const IconComponent = lesson.icon || iconSet[idx % iconSet.length];
                 return (
-                  <div
-                    key={lesson.id}
-                    className="flex items-center justify-between bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors"
-                  >
+                  <div key={lesson.id} className="flex items-center justify-between bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors">
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">
                         <IconComponent className="w-5 h-5 text-orange-400" />
@@ -243,9 +215,7 @@ export default function Course() {
                       </div>
                     </div>
                     <Link to="/two">
-                      <Button variant="outline" size="sm" className="border-gray-600 hover:bg-gray-700">
-                        Start
-                      </Button>
+                      <Button variant="outline" size="sm" className="border-gray-600 hover:bg-gray-700">Start</Button>
                     </Link>
                   </div>
                 );
