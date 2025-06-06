@@ -1,21 +1,23 @@
+/* src/pages/LessonPlayer.jsx — página que exibe o player de vídeo e materiais da aula  */
 
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import supabase from "../supabase";
+import "../../src/App.css";
 
-import { useState } from "react"
-import "../../src/App.css"
-
-// Dados das navegações
+/* Navegação lateral (fixa – pode vir do banco futuramente) */
 const navigationItems = [
-  { id: "introduction", label: "Introduction", icon: "📚", active: true },
-  { id: "foundation", label: "Foundation", icon: "🏗️", active: false },
-  { id: "content", label: "Content", icon: "📝", active: false },
-  { id: "strategies", label: "Strategies", icon: "🎯", active: false },
-  { id: "community", label: "Community", icon: "👥", active: false },
-  { id: "branding", label: "Branding", icon: "🎨", active: false },
-  { id: "metrics", label: "Metrics", icon: "📊", active: false },
-  { id: "search", label: "Search", icon: "🔍", active: false },
-]
+  { id: "introduction", label: "Introduction", icon: "📚" },
+  { id: "foundation", label: "Foundation", icon: "🏗️" },
+  { id: "content", label: "Content", icon: "📝" },
+  { id: "strategies", label: "Strategies", icon: "🎯" },
+  { id: "community", label: "Community", icon: "👥" },
+  { id: "branding", label: "Branding", icon: "🎨" },
+  { id: "metrics", label: "Metrics", icon: "📊" },
+  { id: "search", label: "Search", icon: "🔍" },
+];
 
-// Dados dos accordions
+/* Dados dummy para accordions (pode ser tabelas no supabase) */
 const accordionData = {
   resources: [
     { title: "Live Demo", content: "Access the live demo of this lesson project.", icon: "📄" },
@@ -32,233 +34,143 @@ const accordionData = {
     },
     { title: "Is this template responsive?", content: "Yes, fully responsive for all devices." },
   ],
-}
+};
 
-// Conteúdo das páginas
-const pageContent = {
-  introduction: {
-    title: "Lesson 1 - Introduction",
-    description:
-      "Welcome to this lesson on creating a website template. In this short lesson, we will explore the key steps involved in designing a website template.",
-  },
-  foundation: {
-    title: "Foundation Principles",
-    description:
-      "Learn the fundamental principles of web design and development that form the foundation of great websites.",
-  },
-  content: {
-    title: "Content Strategy",
-    description: "Discover how to create compelling content that engages your audience and drives conversions.",
-  },
-  strategies: {
-    title: "Design Strategies",
-    description: "Explore advanced design strategies and techniques used by professional web designers.",
-  },
-  community: {
-    title: "Building Community",
-    description: "Learn how to build and engage with your online community through effective web design.",
-  },
-  branding: {
-    title: "Brand Identity",
-    description: "Understand how to incorporate brand identity into your web design for consistent messaging.",
-  },
-  metrics: {
-    title: "Analytics & Metrics",
-    description: "Learn how to measure and analyze the performance of your website design and user experience.",
-  },
-  search: {
-    title: "SEO Optimization",
-    description: "Discover search engine optimization techniques to improve your website visibility and ranking.",
-  },
-}
+export default function LessonPlayer() {
+  const { id } = useParams();               // id da aula vindo da rota
+  const [lesson, setLesson] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [expandedAccordions, setExpandedAccordions] = useState(new Set());
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [isCompleted, setIsCompleted]   = useState(false);
 
-function App() {
-  const [currentPage, setCurrentPage] = useState("introduction")
-  const [expandedAccordions, setExpandedAccordions] = useState(new Set())
-  const [isCompleting, setIsCompleting] = useState(false)
-  const [isCompleted, setIsCompleted] = useState(false)
+  /* Busca a aula no Supabase */
+  useEffect(() => {
+    async function fetchLesson() {
+      const { data, error } = await supabase
+        .from("aulas_ia_guanabara")
+        .select("id, titulo, duracao_segundos, video_link, descricao")
+        .eq("id", id)
+        .single();
 
-  // Função para navegar entre páginas
-  const handleNavigation = (pageId) => {
-    setCurrentPage(pageId)
-  }
-
-  // Função para toggle accordion
-  const toggleAccordion = (accordionId) => {
-    setExpandedAccordions((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(accordionId)) {
-        newSet.delete(accordionId)
+      if (error) {
+        console.error("Erro ao buscar aula:", error.message);
       } else {
-        newSet.add(accordionId)
+        setLesson(data);
       }
-      return newSet
-    })
-  }
+      setLoading(false);
+    }
+    fetchLesson();
+  }, [id]);
 
-  // Função para completar lição
-  const handleCompleteLesson = async () => {
-    setIsCompleting(true)
+  /* Toggle accordion */
+  const toggleAccordion = (key) => {
+    setExpandedAccordions((prev) => {
+      const set = new Set(prev);
+      set.has(key) ? set.delete(key) : set.add(key);
+      return set;
+    });
+  };
 
-    // Simular processo de conclusão
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+  /* Concluir aula */
+  const handleComplete = async () => {
+    setIsCompleting(true);
+    await new Promise((r) => setTimeout(r, 1500));
+    setIsCompleting(false);
+    setIsCompleted(true);
+    alert("🎉 Congratulations! Lesson completed successfully!");
+    setTimeout(() => setIsCompleted(false), 3000);
+  };
 
-    setIsCompleting(false)
-    setIsCompleted(true)
-
-    // Mostrar notificação
-    alert("🎉 Congratulations! Lesson completed successfully!")
-
-    // Reset após 3 segundos
-    setTimeout(() => {
-      setIsCompleted(false)
-    }, 3000)
-  }
-
-  const currentContent = pageContent[currentPage]
+  if (loading) return <div className="flex h-screen items-center justify-center text-white">Carregando aula…</div>;
+  if (!lesson)  return <div className="flex h-screen items-center justify-center text-red-400">Aula não encontrada.</div>;
 
   return (
     <div className="app">
-      {/* Sidebar */}
-      <div className="sidebar">
+      {/* ------------ Sidebar -------------- */}
+      <aside className="sidebar">
         <div className="logo">
-          <span className="logo-icon">⚙️</span>
-          Course Template
+          <span className="logo-icon">⚙️</span> Course Template
         </div>
-
         <nav className="navigation">
           {navigationItems.map((item) => (
-            <div
+            <Link
               key={item.id}
-              className={`nav-item ${currentPage === item.id ? "active" : ""}`}
-              onClick={() => handleNavigation(item.id)}
+              to={`#${item.id}`}
+              className={`nav-item ${item.id === "introduction" ? "active" : ""}`}
             >
               <span className="nav-icon">{item.icon}</span>
               {item.label}
-            </div>
+            </Link>
           ))}
         </nav>
-      </div>
+      </aside>
 
-      {/* Main Content */}
-      <div className="main-content">
+      {/* ------------ Main Content ---------- */}
+      <main className="main-content">
         {/* Header */}
-        <div className="lesson-header">
-          <h1 className="lesson-title">{currentContent.title}</h1>
-          <p className="lesson-description">{currentContent.description}</p>
-        </div>
+        <header className="lesson-header">
+          <h1 className="lesson-title">{lesson.titulo}</h1>
+          <p className="lesson-description">{lesson.descricao || "Sem descrição."}</p>
+        </header>
 
-        {/* Hero Section */}
-        <div className="hero-section">
-          <div className="hero-content">
-            <h2 className="hero-title">Input</h2>
-            <p className="hero-subtitle">Create beautiful interfaces</p>
-            <button className="hero-button">Get Started</button>
+        {/* Player YouTube */}
+        <section className="video-wrapper">
+          <div className="video-responsive">
+            <iframe
+              src={lesson.video_link.replace("watch?v=", "embed/")}
+              title={lesson.titulo}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
           </div>
-          <div className="decoration decoration-1"></div>
-          <div className="decoration decoration-2"></div>
-        </div>
+        </section>
 
         {/* Summary */}
         <section className="content-section">
           <h2 className="section-title">Summary</h2>
           <p className="section-content">
-            In this lesson, we will explore the key steps involved in designing a website template. We'll cover the
-            fundamental concepts of layout design, color schemes, typography, and learn how to create a website
-            according and functional foundation for your website. Let's dive in and check out some of various template
-            creation.
+            {lesson.descricao || "No summary available for this lesson."}
           </p>
         </section>
 
-        {/* Resources */}
-        <section className="content-section">
-          <h2 className="section-title">Resources</h2>
-          <div className="accordion-container">
-            {accordionData.resources.map((item, index) => {
-              const accordionId = `resources-${index}`
-              const isExpanded = expandedAccordions.has(accordionId)
-
-              return (
-                <div key={accordionId} className="accordion-item">
-                  <div className="accordion-header" onClick={() => toggleAccordion(accordionId)}>
-                    <div className="accordion-title-wrapper">
-                      <span className="accordion-icon">{item.icon}</span>
-                      <span className="accordion-title">{item.title}</span>
+        {/* Resources / Downloads / FAQ */}
+        {Object.entries(accordionData).map(([groupKey, items]) => (
+          <section className="content-section" key={groupKey}>
+            <h2 className="section-title">{groupKey.charAt(0).toUpperCase() + groupKey.slice(1)}</h2>
+            <div className="accordion-container">
+              {items.map((itm, idx) => {
+                const accId = `${groupKey}-${idx}`;
+                const isOpen = expandedAccordions.has(accId);
+                return (
+                  <div key={accId} className="accordion-item">
+                    <div className="accordion-header" onClick={() => toggleAccordion(accId)}>
+                      <div className="accordion-title-wrapper">
+                        {itm.icon && <span className="accordion-icon">{itm.icon}</span>}
+                        <span className="accordion-title">{itm.title}</span>
+                      </div>
+                      <span className="accordion-toggle">{isOpen ? "−" : "+"}</span>
                     </div>
-                    <span className="accordion-toggle">{isExpanded ? "−" : "+"}</span>
+                    {isOpen && (
+                      <div className="accordion-content">
+                        <p>{itm.content}</p>
+                        {groupKey === "downloads" && <button className="download-btn">Download</button>}
+                      </div>
+                    )}
                   </div>
-                  {isExpanded && (
-                    <div className="accordion-content">
-                      <p>{item.content}</p>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </section>
+                );
+              })}
+            </div>
+          </section>
+        ))}
 
-        {/* Downloads */}
-        <section className="content-section">
-          <h2 className="section-title">Downloads</h2>
-          <div className="accordion-container">
-            {accordionData.downloads.map((item, index) => {
-              const accordionId = `downloads-${index}`
-              const isExpanded = expandedAccordions.has(accordionId)
-
-              return (
-                <div key={accordionId} className="accordion-item">
-                  <div className="accordion-header" onClick={() => toggleAccordion(accordionId)}>
-                    <div className="accordion-title-wrapper">
-                      <span className="accordion-icon">{item.icon}</span>
-                      <span className="accordion-title">{item.title}</span>
-                    </div>
-                    <span className="accordion-toggle">{isExpanded ? "−" : "+"}</span>
-                  </div>
-                  {isExpanded && (
-                    <div className="accordion-content">
-                      <p>{item.content}</p>
-                      <button className="download-btn">Download</button>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section className="content-section">
-          <h2 className="section-title">FAQ</h2>
-          <div className="accordion-container">
-            {accordionData.faq.map((item, index) => {
-              const accordionId = `faq-${index}`
-              const isExpanded = expandedAccordions.has(accordionId)
-
-              return (
-                <div key={accordionId} className="accordion-item">
-                  <div className="accordion-header" onClick={() => toggleAccordion(accordionId)}>
-                    <span className="accordion-title">{item.title}</span>
-                    <span className="accordion-toggle">{isExpanded ? "−" : "+"}</span>
-                  </div>
-                  {isExpanded && (
-                    <div className="accordion-content">
-                      <p>{item.content}</p>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </section>
-
-        {/* Complete Button */}
+        {/* Botão de completar aula */}
         <button
           className={`complete-button ${isCompleted ? "completed" : ""}`}
-          onClick={handleCompleteLesson}
+          onClick={handleComplete}
           disabled={isCompleting}
         >
-          {isCompleting ? "Completing..." : isCompleted ? "✓ Lesson Completed!" : "Complete Lesson"}
+          {isCompleting ? "Completing…" : isCompleted ? "✓ Lesson Completed!" : "Complete Lesson"}
         </button>
 
         {/* Footer */}
@@ -267,9 +179,7 @@ function App() {
           <span>Terms of Service</span>
           <span>Buy this template</span>
         </footer>
-      </div>
+      </main>
     </div>
-  )
+  );
 }
-
-export default App
