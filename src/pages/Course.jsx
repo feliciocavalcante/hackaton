@@ -1,5 +1,3 @@
-/* src/pages/Course.jsx — página principal que lista as aulas vindo do Supabase */
-
 import { useEffect, useState } from "react";
 import {
   BookOpen,
@@ -128,7 +126,14 @@ export default function Course() {
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Menu</h3>
             <ul className="space-y-1">
               {sidebarItems.map(({ icon: Icon, label, active }) => (
-                <li key={label} className={active ? "bg-orange-500/20 text-orange-400 border-l-2 border-orange-500" : "text-gray-300 hover:bg-gray-700 hover:text-white"}>
+                <li
+                  key={label}
+                  className={
+                    active
+                      ? "bg-orange-500/20 text-orange-400 border-l-2 border-orange-500"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                  }
+                >
                   <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm">
                     <Icon className="w-4 h-4" />
                     <span>{label}</span>
@@ -143,7 +148,10 @@ export default function Course() {
             <ul className="space-y-1">
               {communityItems.map(({ icon: Icon, label }) => (
                 <li key={label}>
-                  <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:text-white">
+                  <a
+                    href="#"
+                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                  >
                     <Icon className="w-4 h-4" />
                     <span>{label}</span>
                   </a>
@@ -157,7 +165,10 @@ export default function Course() {
             <ul className="space-y-1">
               {accountItems.map(({ icon: Icon, label }) => (
                 <li key={label}>
-                  <a href="#" className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:text-white">
+                  <a
+                    href="#"
+                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                  >
                     <Icon className="w-4 h-4" />
                     <span>{label}</span>
                   </a>
@@ -204,18 +215,23 @@ export default function Course() {
               .map((lesson, idx) => {
                 const IconComponent = lesson.icon || iconSet[idx % iconSet.length];
                 return (
-                  <div key={lesson.id} className="flex items-center justify-between bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors">
+                  <div
+                    key={lesson.id}
+                    className="flex items-center justify-between bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors"
+                  >
                     <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">
-                        <IconComponent className="w-5 h-5 text-orange-400" />
+                      <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center text-orange-400">
+                        <IconComponent size={20} />
                       </div>
                       <div>
-                        <h4 className="font-medium">{lesson.title}</h4>
+                        <h3 className="text-lg font-semibold">{lesson.title}</h3>
                         <p className="text-sm text-gray-400">{lesson.duration}</p>
                       </div>
                     </div>
-                    <Link to="/two">
-                      <Button variant="outline" size="sm" className="border-gray-600 hover:bg-gray-700">Start</Button>
+                    <Link to={`/two/${lesson.id}`}>
+                      <Button variant="outline" size="sm">
+                        Start
+                      </Button>
                     </Link>
                   </div>
                 );

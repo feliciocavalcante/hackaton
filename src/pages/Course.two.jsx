@@ -1,10 +1,7 @@
-/* src/pages/CourseTwo.jsx — exibe a videoaula individual */
-
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { supabase } from "../utils/supabase";
 import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
 
 export default function CourseTwo() {
   const { id } = useParams();
