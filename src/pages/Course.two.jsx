@@ -13,6 +13,12 @@ export default function CourseTwo() {
 
   useEffect(() => {
     async function fetchLesson() {
+      if (!id) {
+        console.error("ID da aula está indefinido.");
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("aulas_ia_guanabara")
         .select("id, titulo, duracao_segundos, video_link")
